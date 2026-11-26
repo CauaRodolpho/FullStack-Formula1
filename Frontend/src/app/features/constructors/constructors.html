@@ -1,0 +1,285 @@
+<div class="space-y-5">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-black tracking-wider text-white uppercase">
+      F1 Constructors &amp; Teams
+    </h1>
+    <span class="text-xs font-mono text-zinc-400">{{ constructors().length }} TEAMS</span>
+  </div>
+
+  @if (loading()) {
+    <div class="f1-card p-8 text-sm text-zinc-400 animate-pulse">
+      Carregando dados das equipes...
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-950/40 border border-red-800 text-red-300 text-sm rounded-lg p-4">
+      {{ error() }}
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+      <div class="xl:col-span-4 f1-card p-4 space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+            Constructors Standings
+          </h2>
+          <span class="text-[11px] font-mono text-zinc-500">The Grid</span>
+        </div>
+
+        <div class="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
+          @for (team of constructors(); track team.teamId) {
+            <button
+              type="button"
+              (click)="selectTeam(team.teamId)"
+              class="w-full text-left rounded-lg p-3.5 border transition-all flex items-center justify-between gap-3"
+              [class.bg-red-950/25]="selectedTeam()?.teamId === team.teamId"
+              [class.border-red-600]="selectedTeam()?.teamId === team.teamId"
+              [class.bg-[#11151f]]="selectedTeam()?.teamId !== team.teamId"
+              [class.border-[#232a3b]]="selectedTeam()?.teamId !== team.teamId"
+              [class.hover:border-zinc-600]="selectedTeam()?.teamId !== team.teamId"
+            >
+              <div class="flex items-center gap-3.5 min-w-0">
+                <span class="font-mono font-black text-base text-zinc-300 w-5 shrink-0">
+                  {{ team.position }}
+                </span>
+
+                <div
+                  class="w-10 h-10 rounded-lg border flex items-center justify-center font-mono font-black text-xs shrink-0"
+                  [style.border-color]="team.color"
+                  [style.color]="team.color"
+                >
+                  {{ team.chassis }}
+                </div>
+
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full shrink-0"
+                      [style.background-color]="team.color"
+                    ></span>
+                    <p class="text-sm font-black text-white uppercase truncate">
+                      {{ team.name }}
+                    </p>
+                  </div>
+                  <p class="text-xs text-zinc-400 truncate">{{ team.powerUnit }}</p>
+                  <p class="text-sm font-black text-white mt-1">
+                    {{ team.points }} <span class="text-[10px] text-zinc-400">PTS</span>
+                  </p>
+                </div>
+              </div>
+
+              <span class="text-xs font-mono text-zinc-400 shrink-0">{{ team.wins }}W</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (selectedTeam(); as team) {
+        <div class="xl:col-span-4 space-y-4">
+          <div class="f1-card p-5 space-y-4">
+            <div class="flex items-start justify-between">
+              <span class="text-xs font-black tracking-widest text-zinc-400 uppercase">
+                Constructor Profile
+              </span>
+              <div class="text-right">
+                <h2 class="text-xl font-black text-white uppercase leading-tight">
+                  {{ team.name }}
+                </h2>
+                <span
+                  class="inline-block w-12 h-1 rounded-full mt-1"
+                  [style.background-color]="team.color"
+                ></span>
+              </div>
+            </div>
+
+            <div
+              class="py-3 flex items-center justify-center min-h-[150px] bg-[#0d1119] rounded-lg border border-zinc-800/80 px-4"
+            >
+              @if (!brokenCars()[team.teamId]) {
+                <img
+                  [src]="team.carImage"
+                  [alt]="team.name"
+                  (error)="markCarBroken(team.teamId)"
+                  class="max-h-36 w-auto object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.9)]"
+                />
+              } @else {
+                <div class="w-full text-center space-y-2 py-2">
+                  <svg viewBox="0 0 260 65" class="w-full h-16 mx-auto">
+                    <path
+                      d="M15 48 L45 48 L65 34 L125 28 L175 34 L225 42 L245 48 L15 48 Z"
+                      [attr.fill]="team.color"
+                      fill-opacity="0.35"
+                      [attr.stroke]="team.color"
+                      stroke-width="2"
+                    />
+                    <circle
+                      cx="62"
+                      cy="48"
+                      r="11"
+                      fill="#0b0e14"
+                      stroke="#94a3b8"
+                      stroke-width="3"
+                    />
+                    <circle
+                      cx="205"
+                      cy="48"
+                      r="11"
+                      fill="#0b0e14"
+                      stroke="#94a3b8"
+                      stroke-width="3"
+                    />
+                  </svg>
+                  <p class="text-[11px] font-mono text-zinc-500 uppercase">
+                    CHASSIS {{ team.chassis }} · {{ team.powerUnit }}
+                  </p>
+                </div>
+              }
+            </div>
+
+            <div
+              class="grid grid-cols-4 divide-x divide-zinc-800 bg-[#0d1119] border border-zinc-800/80 rounded-lg py-2.5 text-center"
+            >
+              <div class="px-1">
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Base</p>
+                <p class="text-xs font-bold text-white mt-0.5 truncate">{{ team.base }}</p>
+              </div>
+              <div class="px-1">
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Chassis</p>
+                <p class="text-xs font-mono font-bold text-white mt-0.5">{{ team.chassis }}</p>
+              </div>
+              <div class="px-1">
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Power Unit</p>
+                <p class="text-xs font-bold text-white mt-0.5 truncate">{{ team.powerUnit }}</p>
+              </div>
+              <div class="px-1">
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Principal</p>
+                <p class="text-xs font-bold text-white mt-0.5 truncate">{{ team.principal }}</p>
+              </div>
+            </div>
+
+            <div
+              class="grid grid-cols-3 divide-x divide-zinc-800 bg-[#0d1119] border border-zinc-800/80 rounded-lg py-3 text-center"
+            >
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Wins</p>
+                <p class="text-xl font-black text-white mt-0.5">{{ team.wins }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Points</p>
+                <p class="text-xl font-black text-white mt-0.5">{{ team.points }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">World Titles</p>
+                <p class="text-xl font-black text-white mt-0.5">{{ team.worldTitles }}</p>
+              </div>
+            </div>
+
+            <div class="bg-[#0d1119] border border-zinc-800/80 rounded-lg p-3.5 space-y-2">
+              <p class="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">Drivers</p>
+              @for (driver of team.drivers; track driver.code) {
+                <div class="flex items-center justify-between text-sm">
+                  <span class="font-bold text-white">{{ driver.name }}</span>
+                  <span class="font-mono font-bold text-zinc-400">#{{ driver.number }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="xl:col-span-4 space-y-4">
+          <div class="f1-card p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                Performance Metrics
+              </h3>
+              <span class="text-[11px] text-zinc-500">vs Grid Avg</span>
+            </div>
+
+            <svg viewBox="0 0 220 190" class="w-full h-44">
+              <polygon
+                points="110,33 169,75.8 146.4,145.2 73.6,145.2 51,75.8"
+                fill="none"
+                stroke="#232a3b"
+                stroke-width="1"
+              />
+              <polygon
+                points="110,54 149.3,82.5 134.3,128.5 85.7,128.5 70.7,82.5"
+                fill="none"
+                stroke="#232a3b"
+                stroke-width="1"
+              />
+              <polygon
+                points="110,75 129.6,89.2 122.1,111.8 97.9,111.8 90.4,89.2"
+                fill="none"
+                stroke="#232a3b"
+                stroke-width="1"
+              />
+
+              <polygon
+                [attr.points]="gridRadarPolygon"
+                fill="rgba(56, 189, 248, 0.15)"
+                stroke="#38bdf8"
+                stroke-width="1.5"
+              />
+              <polygon
+                [attr.points]="teamRadarPolygon()"
+                fill="rgba(225, 6, 0, 0.28)"
+                stroke="#E10600"
+                stroke-width="2"
+              />
+
+              <text x="110" y="18" text-anchor="middle" fill="#cbd5e1" font-size="9">Aero</text>
+              <text x="180" y="75" text-anchor="start" fill="#cbd5e1" font-size="9">
+                Power Unit
+              </text>
+              <text x="155" y="164" text-anchor="start" fill="#cbd5e1" font-size="9">Strategy</text>
+              <text x="65" y="164" text-anchor="end" fill="#cbd5e1" font-size="9">Pit Stops</text>
+              <text x="40" y="75" text-anchor="end" fill="#cbd5e1" font-size="9">Reliability</text>
+            </svg>
+          </div>
+
+          <div class="f1-card p-5 space-y-3">
+            <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+              Pit Stop Efficiency
+            </h3>
+            <div class="space-y-2.5 text-xs">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-zinc-300 w-24 truncate">{{ team.name }}</span>
+                <div class="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full"
+                    [style.background-color]="team.color"
+                    [style.width.%]="team.metrics.pitStops"
+                  ></div>
+                </div>
+                <span class="font-mono text-zinc-300">2.1s</span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-zinc-400 w-24">Grid Avg</span>
+                <div class="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full bg-zinc-500 w-[78%]"></div>
+                </div>
+                <span class="font-mono text-zinc-400">2.5s</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="f1-card p-5 space-y-2">
+            <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+              Points Progression Over The Season
+            </h3>
+            <svg viewBox="0 0 260 90" class="w-full h-24">
+              <line x1="0" y1="20" x2="260" y2="20" stroke="#1e2533" stroke-width="1" />
+              <line x1="0" y1="50" x2="260" y2="50" stroke="#1e2533" stroke-width="1" />
+              <line x1="0" y1="80" x2="260" y2="80" stroke="#1e2533" stroke-width="1" />
+              <polyline
+                fill="none"
+                [attr.stroke]="team.color"
+                stroke-width="2.5"
+                points="5,80 50,68 95,52 140,44 185,26 230,18 255,12"
+              />
+            </svg>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

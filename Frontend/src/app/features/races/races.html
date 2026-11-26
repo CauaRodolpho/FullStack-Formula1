@@ -1,0 +1,218 @@
+<div class="space-y-5">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-black tracking-wider text-white uppercase">F1 Races &amp; Calendar</h1>
+    <span class="text-xs font-mono text-zinc-400">{{ races().length }} ROUNDS</span>
+  </div>
+
+  @if (loading()) {
+    <div class="f1-card p-8 text-sm text-zinc-400 animate-pulse">
+      Carregando calendário da temporada...
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-950/40 border border-red-800 text-red-300 text-sm rounded-lg p-4">
+      {{ error() }}
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+      <div class="xl:col-span-4 f1-card p-4 space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+            Season Calendar
+          </h2>
+          <span class="text-[11px] font-mono text-zinc-500">The Grid</span>
+        </div>
+
+        <div class="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
+          @for (race of races(); track race.round) {
+            <button
+              type="button"
+              (click)="selectRace(race.round)"
+              class="w-full text-left rounded-lg p-3.5 border transition-all flex items-center justify-between gap-3"
+              [class.bg-red-950/25]="selectedRace()?.round === race.round"
+              [class.border-red-600]="selectedRace()?.round === race.round"
+              [class.bg-[#11151f]]="selectedRace()?.round !== race.round"
+              [class.border-[#232a3b]]="selectedRace()?.round !== race.round"
+              [class.hover:border-zinc-600]="selectedRace()?.round !== race.round"
+            >
+              <div class="flex items-center gap-3.5 min-w-0">
+                <span class="font-mono font-black text-base text-zinc-300 w-9 shrink-0">
+                  R{{ race.round }}
+                </span>
+
+                <div class="min-w-0">
+                  <p class="text-sm font-black text-white uppercase truncate">
+                    {{ race.raceName }}
+                  </p>
+                  <p class="text-xs text-zinc-400 truncate">
+                    {{ race.locality }}, {{ race.country }}
+                  </p>
+                  <div class="flex items-center gap-3 mt-1.5 font-mono text-[11px]">
+                    <span class="text-zinc-300">{{ race.date }}</span>
+                    @if (race.status === 'next') {
+                      <span class="text-red-500 font-bold">● NEXT GP</span>
+                    } @else if (race.status === 'completed') {
+                      <span class="text-zinc-500">COMPLETED</span>
+                    } @else {
+                      <span class="text-zinc-400">UPCOMING</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              @if (race.status === 'completed') {
+                <span class="text-emerald-400 text-sm font-bold shrink-0">✓</span>
+              } @else if (race.status === 'next') {
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0"></span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (selectedRace(); as race) {
+        <div class="xl:col-span-4 f1-card p-5 space-y-5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black tracking-widest text-zinc-400 uppercase">
+              {{ race.status === 'next' ? 'Próximo GP' : 'Grand Prix Circuit' }}
+            </span>
+            <span class="text-xs font-mono text-red-500 font-bold">ROUND {{ race.round }}</span>
+          </div>
+
+          <div class="text-center space-y-1">
+            <h2 class="text-2xl font-black text-white uppercase tracking-tight">
+              {{ race.raceName }}
+            </h2>
+            <p class="text-xs text-zinc-400">{{ race.locality }} · {{ race.country }}</p>
+          </div>
+
+          <div
+            class="bg-[#0d1119] border border-zinc-800/80 rounded-lg p-6 flex items-center justify-center relative"
+          >
+            <svg
+              viewBox="0 0 220 180"
+              class="w-full h-48 drop-shadow-[0_0_12px_rgba(255,255,255,0.12)]"
+              fill="none"
+            >
+              <path
+                d="M45 145 L45 75 Q45 45 75 40 L125 32 Q155 30 148 58 L135 88 Q128 102 150 105 L178 108 Q195 112 182 132 L145 155 Q125 162 105 148 L75 155 Q45 160 45 145 Z"
+                stroke="#272f40"
+                stroke-width="11"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M45 145 L45 75 Q45 45 75 40 L125 32 Q155 30 148 58 L135 88 Q128 102 150 105 L178 108 Q195 112 182 132 L145 155 Q125 162 105 148 L75 155 Q45 160 45 145 Z"
+                stroke="#f8fafc"
+                stroke-width="4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <line x1="36" y1="115" x2="54" y2="115" stroke="#E10600" stroke-width="3.5" />
+            </svg>
+          </div>
+
+          <p class="text-sm font-bold text-zinc-200 border-b border-zinc-800 pb-3">
+            {{ race.circuitName }}
+          </p>
+
+          <div class="grid grid-cols-12 gap-3 items-center">
+            <div class="col-span-6 space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-zinc-400">Extensão:</span>
+                <span class="font-mono font-bold text-white">{{ currentSpecs().length }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">Voltas:</span>
+                <span class="font-mono font-bold text-white">{{ currentSpecs().laps }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">Recorde:</span>
+                <span class="font-mono font-bold text-red-400">{{ currentSpecs().lapRecord }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">Zonas DRS:</span>
+                <span class="font-mono font-bold text-emerald-400">{{
+                  currentSpecs().drsZones
+                }}</span>
+              </div>
+            </div>
+
+            <div class="col-span-6 bg-[#0d1119] border border-zinc-800 rounded-lg p-3 text-center">
+              <p class="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">Countdown</p>
+              <p class="text-lg font-mono font-black text-white mt-1">{{ countdown() }}</p>
+              <p class="text-[10px] text-zinc-500 mt-0.5">Tempo restante</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="xl:col-span-4 space-y-4">
+          <div class="f1-card p-5 space-y-4">
+            <div>
+              <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                Weather &amp; Track Conditions
+              </h3>
+              <p class="text-[11px] text-zinc-500">Previsão telemétrica do circuito</p>
+            </div>
+
+            <div
+              class="grid grid-cols-2 gap-3 bg-[#0d1119] border border-zinc-800/80 rounded-lg p-3.5"
+            >
+              <div>
+                <p class="text-[11px] text-zinc-400">Temperatura Ar</p>
+                <p class="text-xl font-mono font-black text-white mt-0.5">25 °C</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-zinc-400">Temperatura Pista</p>
+                <p class="text-xl font-mono font-black text-amber-400 mt-0.5">44 °C</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-zinc-400">Umidade</p>
+                <p class="text-base font-mono font-bold text-sky-400 mt-0.5">52%</p>
+              </div>
+              <div>
+                <p class="text-[11px] text-zinc-400">Aderência</p>
+                <p class="text-base font-mono font-bold text-emerald-400 mt-0.5">HIGH</p>
+              </div>
+            </div>
+
+            <svg viewBox="0 0 260 65" class="w-full h-16">
+              <defs>
+                <linearGradient id="trackHeat" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E10600" stop-opacity="0.45" />
+                  <stop offset="100%" stop-color="#E10600" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon
+                points="0,65 0,48 45,42 90,26 140,18 190,28 235,36 260,30 260,65"
+                fill="url(#trackHeat)"
+              />
+              <polyline
+                fill="none"
+                stroke="#E10600"
+                stroke-width="2"
+                points="0,48 45,42 90,26 140,18 190,28 235,36 260,30"
+              />
+            </svg>
+          </div>
+
+          <div class="f1-card p-5 space-y-3">
+            <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+              Weekend Schedule
+            </h3>
+
+            <div class="space-y-2">
+              @for (item of weekendSchedule(); track item.session) {
+                <div
+                  class="flex items-center justify-between bg-[#0d1119] border border-zinc-800/80 rounded-lg px-3.5 py-2.5 text-xs"
+                >
+                  <span class="font-semibold text-zinc-200">{{ item.session }}</span>
+                  <span class="font-mono font-bold text-zinc-300">{{ item.time }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

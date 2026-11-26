@@ -1,0 +1,243 @@
+<div class="space-y-5">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-black tracking-wider text-white uppercase">
+      F1 Statistics &amp; Analysis
+    </h1>
+    @if (stats(); as data) {
+      <span class="text-xs font-mono text-zinc-400">
+        {{ data.completedRaces }} / {{ data.totalRaces }} GPS COMPLETED
+      </span>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="f1-card p-8 text-sm text-zinc-400 animate-pulse">
+      Processando análise estatística...
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-950/40 border border-red-800 text-red-300 text-sm rounded-lg p-4">
+      {{ error() }}
+    </div>
+  } @else if (stats(); as data) {
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+      <div class="xl:col-span-4 f1-card p-5 flex flex-col justify-between">
+        <div>
+          <h2 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+            Championship Evolution
+          </h2>
+          <p class="text-[11px] text-zinc-500 mt-0.5">Points progression across rounds</p>
+
+          <div class="flex flex-wrap gap-3 mt-3 text-[11px] font-semibold">
+            @for (team of data.constructorsComparison.slice(0, 4); track team.teamId) {
+              <span class="flex items-center gap-1.5 text-zinc-300">
+                <span class="w-2.5 h-0.5 rounded-full" [style.background-color]="team.color"></span>
+                {{ team.name }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="my-4 bg-[#0d1119] border border-zinc-800/80 rounded-lg p-3">
+          <svg viewBox="0 0 280 280" class="w-full h-72">
+            <g stroke="#1e2533" stroke-width="1">
+              <line x1="25" y1="30" x2="270" y2="30" />
+              <line x1="25" y1="85" x2="270" y2="85" />
+              <line x1="25" y1="140" x2="270" y2="140" />
+              <line x1="25" y1="195" x2="270" y2="195" />
+              <line x1="25" y1="250" x2="270" y2="250" />
+            </g>
+
+            <text x="5" y="34" fill="#64748b" font-size="9">400</text>
+            <text x="5" y="89" fill="#64748b" font-size="9">300</text>
+            <text x="5" y="144" fill="#64748b" font-size="9">200</text>
+            <text x="5" y="199" fill="#64748b" font-size="9">100</text>
+            <text x="12" y="254" fill="#64748b" font-size="9">0</text>
+
+            <polyline
+              fill="none"
+              stroke="#00D2BE"
+              stroke-width="2.5"
+              points="25,248 65,215 105,190 145,155 185,120 225,75 268,35"
+            />
+            <polyline
+              fill="none"
+              stroke="#3671C6"
+              stroke-width="2.5"
+              points="25,248 65,222 105,198 145,168 185,142 225,112 268,85"
+            />
+            <polyline
+              fill="none"
+              stroke="#E10600"
+              stroke-width="2.5"
+              points="25,248 65,230 105,212 145,188 185,165 225,140 268,118"
+            />
+            <polyline
+              fill="none"
+              stroke="#FF8000"
+              stroke-width="2.5"
+              points="25,248 65,236 105,220 145,202 185,182 225,164 268,145"
+            />
+          </svg>
+        </div>
+
+        <p class="text-[11px] font-mono text-zinc-500 text-center">SEASON TELEMETRY CURVE</p>
+      </div>
+
+      <div class="xl:col-span-4 space-y-3.5">
+        @if (mostWinsDriver(); as leader) {
+          <div
+            class="f1-card p-4 relative overflow-hidden flex items-center justify-between min-h-[104px]"
+          >
+            <div class="z-10">
+              <p class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">Most Wins</p>
+              <p class="text-xs text-zinc-300 mt-0.5">{{ leader.name }} ({{ leader.teamName }})</p>
+              <p class="text-2xl font-black text-white mt-1.5">{{ leader.wins }} WINS</p>
+            </div>
+            @if (leader.photoUrl) {
+              <img
+                [src]="leader.photoUrl"
+                [alt]="leader.name"
+                class="h-24 w-auto object-contain absolute right-2 bottom-0"
+              />
+            }
+          </div>
+        }
+
+        @if (fastestLapDriver(); as fast) {
+          <div
+            class="f1-card p-4 relative overflow-hidden flex items-center justify-between min-h-[104px]"
+          >
+            <div class="z-10">
+              <p class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">
+                Fastest Lap
+              </p>
+              <p class="text-xs text-zinc-300 mt-0.5">{{ fast.name }} ({{ fast.teamName }})</p>
+              <p class="text-2xl font-mono font-black text-white mt-1.5">1:10.374</p>
+            </div>
+            @if (fast.photoUrl) {
+              <img
+                [src]="fast.photoUrl"
+                [alt]="fast.name"
+                class="h-24 w-auto object-contain absolute right-2 bottom-0"
+              />
+            }
+          </div>
+        }
+
+        @if (pitStopDriver(); as pit) {
+          <div
+            class="f1-card p-4 relative overflow-hidden flex items-center justify-between min-h-[104px]"
+          >
+            <div class="z-10">
+              <p class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">
+                Fastest Pit Stop
+              </p>
+              <p class="text-xs text-zinc-300 mt-0.5">{{ pit.teamName }} Crew</p>
+              <p class="text-2xl font-mono font-black text-white mt-1.5">2.17s</p>
+            </div>
+            @if (pit.photoUrl) {
+              <img
+                [src]="pit.photoUrl"
+                [alt]="pit.name"
+                class="h-24 w-auto object-contain absolute right-2 bottom-0"
+              />
+            }
+          </div>
+        }
+
+        <div class="f1-card p-4 space-y-2">
+          <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+            Driver Points &amp; Pace Distribution
+          </h3>
+          <div class="bg-[#0d1119] border border-zinc-800/80 rounded-lg p-3">
+            <svg viewBox="0 0 260 130" class="w-full h-32">
+              <g stroke="#1e2533" stroke-width="1">
+                <line x1="20" y1="20" x2="250" y2="20" />
+                <line x1="20" y1="50" x2="250" y2="50" />
+                <line x1="20" y1="80" x2="250" y2="80" />
+                <line x1="20" y1="110" x2="250" y2="110" />
+              </g>
+              <circle cx="55" cy="92" r="4.5" fill="#00D2BE" />
+              <circle cx="78" cy="84" r="4.5" fill="#E10600" />
+              <circle cx="95" cy="70" r="4.5" fill="#FF8000" />
+              <circle cx="118" cy="65" r="4.5" fill="#3671C6" />
+              <circle cx="135" cy="52" r="4.5" fill="#00D2BE" />
+              <circle cx="160" cy="44" r="4.5" fill="#FF8000" />
+              <circle cx="188" cy="34" r="4.5" fill="#E10600" />
+              <circle cx="215" cy="24" r="5" fill="#3671C6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="xl:col-span-4 space-y-4">
+        <div class="f1-card p-5 space-y-3.5">
+          <div>
+            <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+              Teammate Head-To-Head
+            </h3>
+            <p class="text-[11px] text-zinc-500">Points share comparison per constructor</p>
+          </div>
+
+          <div class="space-y-3">
+            @for (pair of headToHeadPairs(); track pair.teamName) {
+              <div class="space-y-1 text-xs">
+                <div class="flex justify-between text-[11px]">
+                  <span class="font-bold text-white truncate max-w-[42%]">{{ pair.d1Name }}</span>
+                  <span class="font-mono text-zinc-500"
+                    >{{ pair.d1Points }} vs {{ pair.d2Points }}</span
+                  >
+                  <span class="font-bold text-zinc-300 truncate max-w-[42%] text-right">
+                    {{ pair.d2Name }}
+                  </span>
+                </div>
+                <div class="w-full h-2 bg-zinc-800 rounded-full overflow-hidden flex gap-0.5">
+                  <div class="h-full rounded-l-full bg-cyan-400" [style.width.%]="pair.d1Pct"></div>
+                  <div class="h-full rounded-r-full bg-red-600" [style.width.%]="pair.d2Pct"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="f1-card p-5 space-y-3">
+          <div>
+            <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+              Lap-By-Lap Comparative Data
+            </h3>
+            <p class="text-[11px] text-zinc-500">Telemetry speed &amp; G-Force trace</p>
+          </div>
+
+          <div class="flex flex-wrap gap-2 text-[10px] font-mono">
+            <span class="px-2 py-1 rounded bg-sky-950/60 border border-sky-800 text-sky-300">
+              AVG. Speed: 232.4 km/h
+            </span>
+            <span class="px-2 py-1 rounded bg-red-950/60 border border-red-800 text-red-300">
+              Max G-Force: 5.2 G
+            </span>
+          </div>
+
+          <div class="bg-[#0d1119] border border-zinc-800/80 rounded-lg p-3">
+            <svg viewBox="0 0 260 110" class="w-full h-28">
+              <line x1="0" y1="25" x2="260" y2="25" stroke="#1e2533" stroke-width="1" />
+              <line x1="0" y1="55" x2="260" y2="55" stroke="#1e2533" stroke-width="1" />
+              <line x1="0" y1="85" x2="260" y2="85" stroke="#1e2533" stroke-width="1" />
+              <path
+                d="M0,75 C30,15 60,95 95,30 C130,85 165,20 205,78 C230,45 245,30 260,55"
+                fill="none"
+                stroke="#38bdf8"
+                stroke-width="2.2"
+              />
+              <path
+                d="M0,65 C35,88 65,20 100,72 C135,25 170,88 210,32 C235,62 248,70 260,42"
+                fill="none"
+                stroke="#E10600"
+                stroke-width="2.2"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

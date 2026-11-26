@@ -1,0 +1,245 @@
+<div class="space-y-5">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-black tracking-wider text-white uppercase">
+      F1 Performance &amp; Analytics
+    </h1>
+    <span class="text-xs font-mono text-zinc-400 uppercase">Live Telemetry Feed</span>
+  </div>
+
+  @if (loading()) {
+    <div class="f1-card p-8 text-sm text-zinc-400 animate-pulse">
+      Sincronizando telemetria da temporada...
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-950/40 border border-red-800 text-red-300 text-sm rounded-lg p-4">
+      {{ error() }}
+    </div>
+  } @else if (data(); as dashboard) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      @if (dashboard.driverLeader; as leader) {
+        <div
+          class="f1-card relative overflow-hidden p-5 flex flex-col justify-between min-h-[155px]"
+        >
+          <div class="z-10 max-w-[65%]">
+            <p class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">
+              World Championship Leader
+            </p>
+            <h2 class="text-xl font-black text-white uppercase leading-tight mt-1">
+              {{ leader.name }}
+            </h2>
+            <p class="text-xs font-semibold uppercase mt-0.5" [style.color]="leader.teamColor">
+              {{ leader.teamName }}
+            </p>
+          </div>
+
+          <div class="z-10 flex items-baseline gap-2 mt-4">
+            <span class="text-red-500 text-xs">▸</span>
+            <span class="text-3xl font-black text-white tracking-tight">{{ leader.points }}</span>
+            <span class="text-xs font-bold text-zinc-400 uppercase">PTS</span>
+          </div>
+
+          @if (leader.photoUrl && !hideLeaderPhoto()) {
+            <img
+              [src]="leader.photoUrl"
+              [alt]="leader.name"
+              (error)="hideLeaderPhoto.set(true)"
+              class="absolute right-2 bottom-0 h-36 w-auto object-contain pointer-events-none drop-shadow-[0_6px_14px_rgba(0,0,0,0.85)]"
+            />
+          }
+
+          <div
+            class="absolute bottom-0 left-0 right-0 h-1"
+            [style.background-color]="leader.teamColor"
+          ></div>
+        </div>
+      }
+
+      @if (dashboard.constructorLeader; as team) {
+        <div
+          class="f1-card relative overflow-hidden p-5 flex flex-col justify-between min-h-[155px]"
+        >
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">
+                Constructors Leader
+              </p>
+              <h2 class="text-xl font-black text-white uppercase leading-tight mt-1">
+                {{ team.name }}
+              </h2>
+              <p class="text-xs text-zinc-400 mt-0.5">{{ team.chassis }} · {{ team.powerUnit }}</p>
+            </div>
+            <span
+              class="text-xs font-mono font-bold px-2.5 py-1 rounded border"
+              [style.border-color]="team.color"
+              [style.color]="team.color"
+            >
+              #1
+            </span>
+          </div>
+
+          <div class="flex items-baseline justify-between mt-4">
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-black text-white">{{ team.points }}</span>
+              <span class="text-xs font-bold text-zinc-400 uppercase">PTS</span>
+            </div>
+            <span class="text-xs font-mono text-zinc-400">{{ team.wins }} WINS</span>
+          </div>
+
+          <div
+            class="absolute bottom-0 left-0 right-0 h-1"
+            [style.background-color]="team.color"
+          ></div>
+        </div>
+      }
+
+      @if (dashboard.nextRace; as race) {
+        <div
+          class="f1-card relative overflow-hidden p-5 flex flex-col justify-between min-h-[155px]"
+        >
+          <div class="z-10 pr-16">
+            <p class="text-[11px] font-bold tracking-widest text-zinc-400 uppercase">
+              Next Grand Prix · R{{ race.round }}
+            </p>
+            <h2 class="text-lg font-black text-white uppercase leading-tight mt-1">
+              {{ race.raceName }}
+            </h2>
+            <p class="text-xs text-zinc-400 truncate">{{ race.circuitName }}</p>
+          </div>
+
+          <div class="z-10 mt-3">
+            <p class="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">Countdown</p>
+            <p class="text-2xl font-mono font-bold text-white tracking-wider">
+              {{ countdown() }}
+            </p>
+          </div>
+
+          <svg
+            viewBox="0 0 120 90"
+            class="absolute right-3 top-3 w-20 h-16 text-zinc-600/40 pointer-events-none"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 70 L35 20 L85 18 L100 40 L75 55 L88 75 L45 78 Z" />
+          </svg>
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+      <div class="xl:col-span-7 f1-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-black tracking-wider text-white uppercase">
+              Drivers Standings
+            </h3>
+            <p class="text-[11px] text-zinc-500">The Grid · Top 8</p>
+          </div>
+          <span class="text-[11px] font-mono text-zinc-400">2026 SEASON</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b border-zinc-800/80 text-[11px] font-bold text-zinc-500 uppercase">
+                <th class="py-2 w-12">Pos</th>
+                <th class="py-2">Driver</th>
+                <th class="py-2">Team</th>
+                <th class="py-2 text-center">Wins</th>
+                <th class="py-2 text-right">Points</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-800/50">
+              @for (item of dashboard.standings; track item.driverId) {
+                <tr class="hover:bg-white/[0.03] transition-colors">
+                  <td class="py-2.5 font-mono font-bold text-zinc-300">
+                    {{ item.position }}
+                  </td>
+                  <td class="py-2.5">
+                    <div class="flex items-center gap-2.5">
+                      <span
+                        class="w-1 h-4 rounded-full shrink-0"
+                        [style.background-color]="item.teamColor"
+                      ></span>
+                      <span class="font-bold text-white uppercase tracking-wide">
+                        {{ item.name }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="py-2.5 text-xs text-zinc-400">{{ item.teamName }}</td>
+                  <td class="py-2.5 text-center font-mono text-zinc-300">{{ item.wins }}</td>
+                  <td class="py-2.5 text-right font-mono font-bold text-white">
+                    {{ item.points }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="xl:col-span-5 f1-card p-5 flex flex-col justify-between gap-5">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-black tracking-wider text-white uppercase">
+              Telemetry &amp; Comparative Analysis
+            </h3>
+            <span class="text-xs font-mono text-red-400">1:23.456</span>
+          </div>
+
+          <div class="bg-[#0b0e14]/80 border border-zinc-800/80 rounded-lg p-3">
+            <svg viewBox="0 0 320 115" class="w-full h-28 overflow-visible">
+              <g stroke="#1e2533" stroke-width="1">
+                <line x1="0" y1="20" x2="320" y2="20" />
+                <line x1="0" y1="50" x2="320" y2="50" />
+                <line x1="0" y1="80" x2="320" y2="80" />
+                <line x1="0" y1="108" x2="320" y2="108" />
+              </g>
+              <polyline
+                fill="none"
+                stroke="#00D2BE"
+                stroke-width="2.2"
+                points="0,98 55,78 110,74 165,45 220,42 275,24 320,16"
+              />
+              <polyline
+                fill="none"
+                stroke="#E10600"
+                stroke-width="2.2"
+                points="0,102 55,88 110,68 165,64 220,46 275,38 320,28"
+              />
+              <polyline
+                fill="none"
+                stroke="#FF8000"
+                stroke-width="2.2"
+                points="0,105 55,95 110,82 165,72 220,60 275,45 320,35"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <p class="text-[11px] font-bold tracking-widest text-zinc-500 uppercase">
+            Constructors Pace &amp; Points Index
+          </p>
+          @for (team of dashboard.constructorsTop; track team.teamId) {
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-bold text-zinc-200">{{ team.name }}</span>
+                <span class="font-mono text-zinc-400">{{ team.points }} PTS</span>
+              </div>
+              <div class="w-full h-2 bg-zinc-800/90 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  [style.background-color]="team.color"
+                  [style.width.%]="(team.points / maxTeamPoints()) * 100"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

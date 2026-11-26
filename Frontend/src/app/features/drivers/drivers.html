@@ -1,0 +1,300 @@
+<div class="space-y-5">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 class="text-2xl font-black tracking-wider text-white uppercase">
+      F1 Drivers &amp; Standings
+    </h1>
+
+    <input
+      type="text"
+      placeholder="Filtrar piloto ou equipe..."
+      (input)="searchQuery.set($any($event.target).value)"
+      class="bg-[#121620] border border-[#232a3b] text-sm text-white placeholder-zinc-500 rounded-lg px-3.5 py-2 w-full sm:w-64 focus:outline-none focus:border-red-600"
+    />
+  </div>
+
+  @if (loading()) {
+    <div class="f1-card p-8 text-sm text-zinc-400 animate-pulse">
+      Carregando telemetria dos pilotos...
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-950/40 border border-red-800 text-red-300 text-sm rounded-lg p-4">
+      {{ error() }}
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+      <div class="xl:col-span-4 f1-card p-4 space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h2 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+            Drivers Standings
+          </h2>
+          <span class="text-[11px] font-mono text-zinc-500">The Grid</span>
+        </div>
+
+        <div class="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
+          @for (driver of filteredDrivers(); track driver.driverId) {
+            <button
+              type="button"
+              (click)="selectDriver(driver.driverId)"
+              class="w-full text-left rounded-lg p-3 border transition-all flex items-center justify-between gap-3"
+              [class.bg-red-950/25]="selectedDriver()?.driverId === driver.driverId"
+              [class.border-red-600]="selectedDriver()?.driverId === driver.driverId"
+              [class.bg-[#11151f]]="selectedDriver()?.driverId !== driver.driverId"
+              [class.border-[#232a3b]]="selectedDriver()?.driverId !== driver.driverId"
+              [class.hover:border-zinc-600]="selectedDriver()?.driverId !== driver.driverId"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="font-mono font-black text-base text-zinc-300 w-5 shrink-0">
+                  {{ driver.position }}
+                </span>
+
+                <div
+                  class="w-11 h-11 rounded-full overflow-hidden bg-zinc-800 border shrink-0 flex items-center justify-center"
+                  [style.border-color]="driver.teamColor"
+                >
+                  @if (driver.photoUrl && !brokenPhotos()[driver.driverId]) {
+                    <img
+                      [src]="driver.photoUrl"
+                      [alt]="driver.name"
+                      (error)="markPhotoBroken(driver.driverId)"
+                      class="w-full h-full object-cover object-top"
+                    />
+                  } @else {
+                    <span class="text-xs font-mono font-bold text-white">{{ driver.code }}</span>
+                  }
+                </div>
+
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full shrink-0"
+                      [style.background-color]="driver.teamColor"
+                    ></span>
+                    <p class="text-sm font-black text-white uppercase truncate">
+                      {{ driver.name }}
+                    </p>
+                  </div>
+                  <p class="text-xs text-zinc-400 truncate">{{ driver.teamName }}</p>
+                  <div class="flex items-center gap-3 mt-1">
+                    <span class="text-sm font-black text-white">
+                      {{ driver.points }} <span class="text-[10px] text-zinc-400">PTS</span>
+                    </span>
+                    <span class="text-[11px] font-mono text-emerald-400">
+                      WINS {{ driver.wins }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <span
+                class="text-[11px] font-mono font-bold px-2 py-1 rounded border shrink-0"
+                [style.border-color]="driver.teamColor"
+                [style.color]="driver.teamColor"
+              >
+                {{ driver.code }}
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (selectedDriver(); as driver) {
+        <div class="xl:col-span-4 space-y-4">
+          <div class="f1-card p-5 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-black tracking-widest text-zinc-400 uppercase">
+                Driver Profile
+              </span>
+              <span
+                class="text-[11px] font-mono font-bold px-2 py-0.5 rounded text-white"
+                [style.background-color]="driver.teamColor"
+              >
+                {{ driver.teamName }}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-12 items-end gap-2 pt-2 min-h-[250px]">
+              <div class="col-span-7 flex justify-center items-end">
+                @if (driver.photoUrl && !brokenPhotos()[driver.driverId]) {
+                  <img
+                    [src]="driver.photoUrl"
+                    [alt]="driver.name"
+                    (error)="markPhotoBroken(driver.driverId)"
+                    class="h-60 w-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
+                  />
+                } @else {
+                  <div class="h-56 w-40 rounded-lg bg-zinc-800/70 flex items-center justify-center">
+                    <span class="text-4xl font-black text-zinc-600">{{ driver.code }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="col-span-5 flex flex-col justify-between h-full pb-3">
+                <div>
+                  <p class="text-lg font-bold text-zinc-300 uppercase leading-none">
+                    {{ firstName(driver.name) }}
+                  </p>
+                  <h2 class="text-2xl font-black text-white uppercase tracking-tight leading-tight">
+                    {{ lastName(driver.name) }}
+                  </h2>
+                </div>
+
+                <div class="my-4 flex items-baseline gap-1 font-mono font-black">
+                  <span class="text-4xl text-zinc-500">{{ driver.number }}</span>
+                  <span class="text-3xl text-zinc-600">/</span>
+                  <span class="text-4xl" [style.color]="driver.teamColor">
+                    P{{ driver.position }}
+                  </span>
+                </div>
+
+                <p class="text-xs text-zinc-400 uppercase tracking-wider">
+                  {{ driver.nationality }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="grid grid-cols-4 divide-x divide-zinc-800 bg-[#0d1119] border border-zinc-800/80 rounded-lg py-3 mt-2 text-center"
+            >
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Age</p>
+                <p class="text-lg font-black text-white mt-0.5">{{ driverAge() }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Points</p>
+                <p class="text-lg font-black text-white mt-0.5">{{ driver.points }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Wins</p>
+                <p class="text-lg font-black text-white mt-0.5">{{ driver.wins }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Car #</p>
+                <p class="text-lg font-black text-white mt-0.5">{{ driver.number }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="f1-card p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                Season Form Index
+              </h3>
+              <span class="text-[11px] font-mono text-zinc-500">2026 STINTS</span>
+            </div>
+
+            <div
+              class="grid grid-cols-6 gap-2 items-end h-24 pt-4 px-2 bg-[#0d1119] rounded-lg border border-zinc-800/80"
+            >
+              <div class="h-6 rounded-t bg-red-600/80"></div>
+              <div class="h-10 rounded-t bg-red-600"></div>
+              <div class="h-12 rounded-t bg-sky-500/80"></div>
+              <div class="h-16 rounded-t bg-sky-500"></div>
+              <div class="h-14 rounded-t" [style.background-color]="driver.teamColor"></div>
+              <div class="h-20 rounded-t" [style.background-color]="driver.teamColor"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="xl:col-span-4 space-y-4">
+          <div class="f1-card p-5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                Performance Metrics
+              </h3>
+              <span class="text-[11px] text-zinc-500">vs Grid Avg</span>
+            </div>
+
+            <svg viewBox="0 0 220 190" class="w-full h-44">
+              <polygon
+                points="110,33 169,75.8 146.4,145.2 73.6,145.2 51,75.8"
+                fill="none"
+                stroke="#232a3b"
+                stroke-width="1"
+              />
+              <polygon
+                points="110,54 149.3,82.5 134.3,128.5 85.7,128.5 70.7,82.5"
+                fill="none"
+                stroke="#232a3b"
+                stroke-width="1"
+              />
+              <polygon
+                points="110,75 129.6,89.2 122.1,111.8 97.9,111.8 90.4,89.2"
+                fill="none"
+                stroke="#232a3b"
+                stroke-width="1"
+              />
+
+              <polygon
+                [attr.points]="gridAveragePolygon"
+                fill="rgba(56, 189, 248, 0.15)"
+                stroke="#38bdf8"
+                stroke-width="1.5"
+              />
+              <polygon
+                [attr.points]="driverRadarPoints()"
+                fill="rgba(225, 6, 0, 0.28)"
+                stroke="#E10600"
+                stroke-width="2"
+              />
+
+              <text x="110" y="18" text-anchor="middle" fill="#cbd5e1" font-size="9">Speed</text>
+              <text x="182" y="75" text-anchor="start" fill="#cbd5e1" font-size="9">Racecraft</text>
+              <text x="155" y="164" text-anchor="start" fill="#cbd5e1" font-size="9">
+                Qualifying
+              </text>
+              <text x="65" y="164" text-anchor="end" fill="#cbd5e1" font-size="9">Consistency</text>
+              <text x="38" y="75" text-anchor="end" fill="#cbd5e1" font-size="9">Experience</text>
+            </svg>
+          </div>
+
+          @if (teammate(); as mate) {
+            <div class="f1-card p-5 space-y-3">
+              <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                Team Comparison
+              </h3>
+
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between font-bold">
+                  <span class="text-white">{{ lastName(driver.name) }} (#{{ driver.number }})</span>
+                  <span class="font-mono text-zinc-300">{{ driver.points }} PTS</span>
+                </div>
+                <div class="w-full h-2.5 bg-zinc-800 rounded-full overflow-hidden flex">
+                  <div
+                    class="h-full transition-all"
+                    [style.background-color]="driver.teamColor"
+                    [style.width.%]="teammateShare(driver.points, mate.points)"
+                  ></div>
+                  <div
+                    class="h-full bg-zinc-600 transition-all"
+                    [style.width.%]="100 - teammateShare(driver.points, mate.points)"
+                  ></div>
+                </div>
+                <div class="flex justify-between text-zinc-400">
+                  <span>{{ lastName(mate.name) }} (#{{ mate.number }})</span>
+                  <span class="font-mono">{{ mate.points }} PTS</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="f1-card p-5 space-y-2">
+            <h3 class="text-xs font-black tracking-widest text-zinc-300 uppercase">
+              Points Progression Over The Season
+            </h3>
+            <svg viewBox="0 0 260 90" class="w-full h-24">
+              <line x1="0" y1="20" x2="260" y2="20" stroke="#1e2533" stroke-width="1" />
+              <line x1="0" y1="50" x2="260" y2="50" stroke="#1e2533" stroke-width="1" />
+              <line x1="0" y1="80" x2="260" y2="80" stroke="#1e2533" stroke-width="1" />
+              <polyline
+                fill="none"
+                [attr.stroke]="driver.teamColor"
+                stroke-width="2.5"
+                points="5,78 50,65 95,58 140,40 185,28 230,18 255,10"
+              />
+            </svg>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
